@@ -1,7 +1,7 @@
-# fast-gin
+# Fast-Gin
 基于 Gin 的企业通用开发脚手架。
 
-集成 zap+lumberjack、viper、sqlx、go-redis 等...
+集成了 Go 生态中的热门库： Gin、zap+lumberjack、viper、sqlx、go-redis 等...
 
 ## 支持
 fast-gin，采用 Go 语言规范的工程化模块儿划分，根据自己的需求进行简单的修改，快速进行高效的 Web 开发，主要功能有：
