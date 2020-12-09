@@ -1,0 +1,20 @@
+# 程序基本信息
+name: "fast-gin" # 程序名称
+version: "v0.1.1" # 版本号
+mode: "dev" # 程序运行的模式，这里是开发模式
+port: 8080 # 程序运行的端口
+start_time: "2020-12-01"
+time_location: "Asia/Shanghai"
+machine_id: 11
+
+# log
+log:
+  level: "debug" # x
+  filename: "fast-gin.log"
+  max_size: 200 # 日志最大容量（单位 MB）
+  max_age: 30 # 备份存储最大时间
+  max_backup: 7 # 日志最大备份数量
+
+# auth
+auth:
+  jwt_expire: 168 # 过期时间为一周（24 * 7）
