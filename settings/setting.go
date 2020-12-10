@@ -66,10 +66,10 @@ func InitModule(configPath string, modules []string) error {
 		return err
 	}
 
-	// 初始化配置文件
-	if err := initViperConf(); err != nil {
-		return err
-	}
+	// 初始化配置文件 ? => 作用
+	// if err := initViperConf(); err != nil {
+	// 	return err
+	// }
 
 	// 加载 base 配置
 	if InArrayString("base", modules) {

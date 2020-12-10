@@ -1,11 +1,7 @@
 package settings
 
 import (
-	"bytes"
-	"io/ioutil"
 	"os"
-	"strings"
-	"time"
 
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -168,6 +164,7 @@ func initLog(cfg *LogConfig) (err error) {
 	return
 }
 
+/*
 // initViperConf 初始化配置文件
 func initViperConf() error {
 	f, err := os.Open(ConfEnvPath + "/")
@@ -200,7 +197,9 @@ func initViperConf() error {
 	// 	ViperConfMap["mysql"], ViperConfMap["redis"])
 	return nil
 }
+*/
 
+/*
 // GetStringConf 获取 string 类型配置信息
 func GetStringConf(key string) string {
 	keys := strings.Split(key, ".")
@@ -315,3 +314,4 @@ func IsSetConf(key string) bool {
 	conf := v.IsSet(strings.Join(keys[1:len(keys)], "."))
 	return conf
 }
+*/
