@@ -69,7 +69,7 @@ func InitDBPool() error {
 		}
 		dbgorm.LogMode(true)
 		// dbgorm.Log
-		dbgorm.SetLogger(&GormLogger{Trace: settings.NewTrace()})
+		dbgorm.SetLogger(&GormLogger{Trace: mylog.NewTrace()})
 		dbgorm.DB().SetMaxOpenConns(DBConf.MaxOpenConns)
 		dbgorm.DB().SetMaxIdleConns(DBConf.MaxIdleConns)
 

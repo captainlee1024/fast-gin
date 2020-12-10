@@ -1,14 +1,23 @@
 package log
 
 import (
+	"bytes"
+	"encoding/binary"
+	"encoding/hex"
 	"fmt"
+	"math/rand"
+	"net"
+	"os"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
+
+var localIP = net.ParseIP("127.0.0.1")
 
 // 通用DLTag常量定义
 const (
@@ -211,4 +220,49 @@ func parseParams(m map[string]interface{}) string {
 	}
 	dltag = strings.Trim(fmt.Sprintf("%q", dltag), "\"")
 	return dltag
+}
+
+// NewTrace 创建 TraceContext 并生成 TraceID SpandID
+func NewTrace() *TraceContext {
+	trace := &TraceContext{}
+	trace.Trace.TraceID = GetTraceID()
+	trace.SpandID = NewSpanID()
+	return trace
+}
+
+// NewSpanID description
+func NewSpanID() string {
+	timestamp := uint32(time.Now().Unix())
+	ipToLong := binary.BigEndian.Uint32(localIP.To4())
+	b := bytes.Buffer{}
+	b.WriteString(fmt.Sprintf("%08x", ipToLong^timestamp))
+	b.WriteString(fmt.Sprintf("%08x", rand.Int31()))
+	return b.String()
+}
+
+// GetTraceID 创建并获取 TraceID
+func GetTraceID() (traceID string) {
+	return calcTraceID(localIP.String())
+}
+
+// 生成 traceID
+func calcTraceID(ip string) (trace string) {
+	now := time.Now()
+	timestamp := uint32(now.Unix())
+	timeNano := now.UnixNano()
+	pid := os.Getpid()
+
+	b := bytes.Buffer{}
+	netIP := net.ParseIP(ip)
+	if netIP != nil {
+		b.WriteString("00000000")
+	} else {
+		b.WriteString(hex.EncodeToString(netIP.To4()))
+	}
+	b.WriteString(fmt.Sprintf("%08x", timestamp&0xffffffff))
+	b.WriteString(fmt.Sprintf("%04x", timeNano&0xffff))
+	b.WriteString(fmt.Sprintf("%04x", pid&0xffff))
+	b.WriteString(fmt.Sprintf("%06x", rand.Int31n(1<<24)))
+
+	return b.String()
 }

@@ -3,6 +3,8 @@ module github.com/captainlee1024/fast-gin
 go 1.15
 
 require (
+	github.com/bwmarrin/snowflake v0.3.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/garyburd/redigo v1.6.2
 	github.com/go-redis/redis v6.15.9+incompatible

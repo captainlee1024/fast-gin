@@ -55,7 +55,7 @@ func main() {
 	// 4. 初始化 Redis 连接
 	defaultConn, err := redis.ConnFactory("default")
 	if err != nil {
-		mylog.Log.Error("redis", settings.NewTrace(), mylog.DLTagUndefind, map[string]interface{}{
+		mylog.Log.Error("redis", mylog.NewTrace(), mylog.DLTagUndefind, map[string]interface{}{
 			"error": err,
 		})
 	}
@@ -65,21 +65,21 @@ func main() {
 	// 6. 启动服务（开启平滑下线）
 
 	// test debug
-	mylog.Log.Debug("/debug", settings.NewTrace(), mylog.DLTagUndefind,
+	mylog.Log.Debug("/debug", mylog.NewTrace(), mylog.DLTagUndefind,
 		map[string]interface{}{
 			"message":  "debug 测试替换日志默认Caller",
 			"error":    errors.New("text string"),
 			"balabala": "xxxx"})
 
 	// todo sth
-	mylog.Log.Info("/test", settings.NewTrace(), mylog.DLTagUndefind,
+	mylog.Log.Info("/test", mylog.NewTrace(), mylog.DLTagUndefind,
 		map[string]interface{}{
 			"message":  "todo sth",
 			"error":    errors.New("text string"),
 			"balabala": "xxxx"})
 
 	// test error
-	mylog.Log.Error("/error", settings.NewTrace(), mylog.DLTagUndefind,
+	mylog.Log.Error("/error", mylog.NewTrace(), mylog.DLTagUndefind,
 		map[string]interface{}{
 			"message":  "error 级别日志测试",
 			"error":    errors.New("text string"),
