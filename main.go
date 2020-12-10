@@ -5,8 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/captainlee1024/fast-gin/log"
-
+	"github.com/captainlee1024/fast-gin/dao/mysql"
+	"github.com/captainlee1024/fast-gin/dao/redis"
+	mylog "github.com/captainlee1024/fast-gin/log"
 	"github.com/captainlee1024/fast-gin/settings"
 )
 
@@ -44,31 +45,43 @@ import (
 func main() {
 	// 1. 加载配置
 	// 2. 初始化日志
-	// 3. 初始化 MySQL 连接
-	// 4. 初始化 Redis 连接
 	if err := settings.Init("./conf/dev/"); err != nil {
 		// log.Fatal(err)
 		panic(err)
 	}
-	// if err := settings.InitModule("./conf/dev/", []string{"base", "redis", "mysql"}); err != nil {
-	// 	log.Fatal(err)
-	// }
+
+	// 3. 初始化 MySQL 连接
+	mysql.InitDBPool()
+	// 4. 初始化 Redis 连接
+	defaultConn, err := redis.ConnFactory("default")
+	if err != nil {
+		mylog.Log.Error("redis", settings.NewTrace(), mylog.DLTagUndefind, map[string]interface{}{
+			"error": err,
+		})
+	}
+	defer defaultConn.Close()
 
 	// 5. 注册路由
 	// 6. 启动服务（开启平滑下线）
-	//time.Sleep(time.Second * 10)
 
 	// test debug
-	log.Log.Debug("/debug", settings.NewTrace(), log.DLTagUndefind,
+	mylog.Log.Debug("/debug", settings.NewTrace(), mylog.DLTagUndefind,
 		map[string]interface{}{
 			"message":  "debug 测试替换日志默认Caller",
 			"error":    errors.New("text string"),
 			"balabala": "xxxx"})
 
 	// todo sth
-	log.Log.Info("/test", settings.NewTrace(), log.DLTagUndefind,
+	mylog.Log.Info("/test", settings.NewTrace(), mylog.DLTagUndefind,
 		map[string]interface{}{
 			"message":  "todo sth",
+			"error":    errors.New("text string"),
+			"balabala": "xxxx"})
+
+	// test error
+	mylog.Log.Error("/error", settings.NewTrace(), mylog.DLTagUndefind,
+		map[string]interface{}{
+			"message":  "error 级别日志测试",
 			"error":    errors.New("text string"),
 			"balabala": "xxxx"})
 

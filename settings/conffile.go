@@ -32,25 +32,6 @@ func ParseConfPath(config string) error {
 	return nil
 }
 
-// // Init 初始化配置
-// func Init(filePath string) (err error) {
-// 	if filePath != "" {
-// 		ConfEnvPath = filePath
-// 	} else {
-// 		ConfEnvPath = DefaultConfEnvPath
-// 	}
-
-// 	initBaseConf(ConfEnvPath)
-
-// 	initRedisConf(ConfEnvPath)
-
-// 	initMySQLConf(ConfEnvPath)
-
-// 	fmt.Printf("%#v\n", ConfBase)
-// 	fmt.Printf("%#v\n", ConfBase.LogConfig)
-// 	return nil
-// }
-
 // GetConfEnv 获取配置环境名
 func GetConfEnv() string {
 	return ConfEnv

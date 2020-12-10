@@ -76,7 +76,7 @@ func GetEncoder() zapcore.Encoder {
 		EncodeTime:     zapcore.ISO8601TimeEncoder, // 修改之后的时间编码器
 		EncodeDuration: zapcore.SecondsDurationEncoder,
 		// EncodeCaller:   zapcore.ShortCallerEncoder,
-		EncodeCaller: myCollerEncoder,
+		EncodeCaller: myCollerEncoder, // 替换成自己的 caller 解析器
 	}
 
 	// p配置 JSON 编码器
@@ -91,21 +91,12 @@ func GetEncoder() zapcore.Encoder {
 func myCollerEncoder(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
 	// TODO: consider using a byte-oriented API to save an allocation.
 	pc, file, line, ok := runtime.Caller(6)
-	// caller := "undefined"
-	// if ok {
-	// 	// code = path.Base(file) + ":" + strconv.Itoa(line)
-	// 	caller = fmt.Sprintf("%s:%d", path.Base(file), line)
-	// }
+
 	caller.PC = pc
 	caller.File = file
 	caller.Line = line
 	caller.Defined = ok
-	// mycaller := EntryCaller{
-	// 	Defined ok,
-	// 	PC      pc
-	// 	File    file
-	// 	Line    line,
-	// }
+
 	enc.AppendString(caller.TrimmedPath())
 }
 
@@ -127,43 +118,18 @@ func (l *Logger) Debug(msg string, trace *TraceContext, dltag string, m map[stri
 	// m[_childSpanID] = trace.CSpanID
 	// m[_spanID] = trace.SpandID
 	// l.L.Debug(parseParams(m))
-	l.L.Debug(msg, zap.String(_traceID, trace.TraceID),
+	l.L.Debug(msg, zap.String("msg", parseParams(m)),
+		zap.String(_traceID, trace.TraceID),
 		zap.String(_spanID, trace.SpandID),
-		zap.String(_childSpanID, trace.CSpanID),
-		zap.String("msg", parseParams(m)))
+		zap.String(_childSpanID, trace.CSpanID))
 }
 
 // Info Info级别日志
 func (l *Logger) Info(msg string, trace *TraceContext, dltag string, m map[string]interface{}) {
-	// dltag = CheckDLTag(dltag)
-	// m[_traceID] = trace.TraceID
-	// m[_childSpanID] = trace.CSpanID
-	// m[_spanID] = trace.SpandID
-	// traceMsg := traceFormat(trace, dltag)
-	// l.L.Info(msg, zap.String(traceMsg, fmt.Sprintf("%v", m["message"])))
-
-	// eg: 2020-12-09T14:45:54.100+0800	info	log/log.go:107	/test	{"traceid=000000005fd072a2a1b0eba1658221|spanid=9f786d5978629a0f|cspanid=": "_undef|error=text string|balabala=xxxx|message=todo sth"}
-	// l.L.Info(msg, zap.String(traceMsg, parseParams(m)))
-
-	// eg: 2020-12-09T14:52:44.440+0800	info	log/log.go:111	/test	{"traceid": "000000005fd0743c70d618e9658221", "spanid": "9f786bc778629a0f", "cspanid": "", "msg": "_undef|message=todo sth|error=text string|balabala=xxxx"}
-	// source code, file and line num
-	// pc, file, line, ok := runtime.Caller(1)
-	// caller := "undefined"
-	// if ok {
-	// 	// code = path.Base(file) + ":" + strconv.Itoa(line)
-	// 	caller = fmt.Sprintf("%s:%d", path.Base(file), line)
-	// }
-
-	// l.L.Core().Write(zapcore.Entry{
-	// 	Level:  zapcore.InfoLevel,
-	// 	Caller: zapcore.NewEntryCaller(pc, file, line, ok)}, []zapcore.Field{zap.String("callertest", "测试caller")})
-
-	// m["caller"] = caller
-
-	l.L.Info(msg, zap.String(_traceID, trace.TraceID),
+	l.L.Info(msg, zap.String("msg", parseParams(m)),
+		zap.String(_traceID, trace.TraceID),
 		zap.String(_spanID, trace.SpandID),
-		zap.String(_childSpanID, trace.CSpanID),
-		zap.String("msg", parseParams(m)))
+		zap.String(_childSpanID, trace.CSpanID))
 }
 
 // Warn warn 级别日志
@@ -176,28 +142,10 @@ func (l *Logger) Warn(msg string, trace *TraceContext, dltag string, m map[strin
 
 // Error error 级别日志
 func (l *Logger) Error(msg string, trace *TraceContext, dltag string, m map[string]interface{}) {
-	// m[_dlTag] = CheckDLTag(dltag)
-	// m[_traceID] = trace.TraceID
-	// m[_childSpanID] = trace.CSpanID
-	// m[_spanID] = trace.SpandID
-	// l.L.Error(parseParams(m))
-	// pc, file, line, ok := runtime.Caller(1)
-	// caller := "undefined"
-	// if ok {
-	// 	// code = path.Base(file) + ":" + strconv.Itoa(line)
-	// 	caller = fmt.Sprintf("%s:%d", path.Base(file), line)
-	// }
-	// l.L.Core().Write(zapcore.Entry{
-	// 	// Time: zapcore.Con
-	// 	Level:  zapcore.ErrorLevel,
-	// 	Caller: zapcore.NewEntryCaller(pc, file, line, ok)}, []zapcore.Field{zap.String("callertest", "测试caller")})
-
-	// m["caller"] = caller
-
-	l.L.Error(msg, zap.String(_traceID, trace.TraceID),
+	l.L.Error(msg, zap.String("msg", parseParams(m)),
+		zap.String(_traceID, trace.TraceID),
 		zap.String(_spanID, trace.SpandID),
-		zap.String(_childSpanID, trace.CSpanID),
-		zap.String("msg", parseParams(m)))
+		zap.String(_childSpanID, trace.CSpanID))
 }
 
 // DPanic DPanic 级别日志
@@ -223,9 +171,6 @@ func (l *Logger) Fatal(msg string, trace *TraceContext, dltag string, m map[stri
 		zap.String(_childSpanID, trace.CSpanID),
 		zap.String("msg", parseParams(m)))
 }
-
-// func Trace() {
-// }
 
 // CheckDLTag 检验 dltag 合法性
 func CheckDLTag(dltag string) string {

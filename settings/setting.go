@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"encoding/binary"
 	"encoding/hex"
-	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -33,15 +32,17 @@ var (
 //
 // 函数传入配置文件 Init("./conf/dev/")
 // 如果配置文件为空，会重命令行读取 -config conf/dev/
-// 1. 加载配置
+// 1. 加载配置(base、mysql、redis etc...)
 // 2. 初始化日志
-// 3. 初始化 MySQL 连接
-// 4. 初始化 Redis 连接
 func Init(configPath string) error {
 	return InitModule(configPath, []string{"base", "mysql", "redis"})
 }
 
 // InitModule 模块初始化
+// 1. 加载 base 配置
+// 2. 加载 mysql 配置
+// 3. 加载 redis 配置
+// 4. 初始化日志
 func InitModule(configPath string, modules []string) error {
 	conf := flag.String("conf", configPath, "imput config fiel like: ./conf/dev")
 	flag.Parse()
@@ -103,43 +104,6 @@ func InitModule(configPath string, modules []string) error {
 
 	log.Printf("[INFO] success loading resources.\n")
 	log.Println("------------------------------------------------------------------------")
-
-	mylog.Log.Error("/error", NewTrace(), mylog.DLTagUndefind,
-		map[string]interface{}{
-			"message": "test caller 测试替换日志默认Caller",
-			"error":   errors.New("text string")})
-
-	/*
-		mylog.Log.Warn("/warn", NewTrace(), mylog.DLTagUndefind,
-			map[string]interface{}{
-				"message":  "warn 测试替换日志默认Caller",
-				"error":    errors.New("text string"),
-				"balabala": "xxxx"})
-
-		mylog.Log.Error("/error", NewTrace(), mylog.DLTagUndefind,
-			map[string]interface{}{
-				"message": "test caller 测试替换日志默认Caller",
-				"error":   errors.New("text string")})
-
-		mylog.Log.DPanic("/dpanic", NewTrace(), mylog.DLTagUndefind,
-			map[string]interface{}{
-				"message":  "dpanic 测试替换日志默认Caller",
-				"error":    errors.New("text string"),
-				"balabala": "xxxx"})
-
-		// mylog.Log.Panic("/panic", NewTrace(), mylog.DLTagUndefind,
-		// 	map[string]interface{}{
-		// 		"message":  "panic 测试替换日志默认Caller",
-		// 		"error":    errors.New("text string"),
-		// 		"balabala": "xxxx"})
-
-		// mylog.Log.Fatal("/fatal", NewTrace(), mylog.DLTagUndefind,
-		// 	map[string]interface{}{
-		// 		"message":  "fatal 测试替换日志默认Caller",
-		// 		"error":    errors.New("text string"),
-		// 		"balabala": "xxxx"})
-	*/
-
 	return nil
 }
 
@@ -178,7 +142,7 @@ func InArrayString(s string, arr []string) bool {
 	return false
 }
 
-// HTTPGET 封装日志信息
+// HTTPGET 带有日志信息日志信息
 func HTTPGET(trace *mylog.TraceContext, urlString string, urlParams url.Values, msTimeout int,
 	header http.Header) (*http.Response, []byte, error) {
 	startTime := time.Now().UnixNano()

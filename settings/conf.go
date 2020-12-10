@@ -2,14 +2,11 @@ package settings
 
 import (
 	"bytes"
-	"database/sql"
 	"io/ioutil"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/jinzhu/gorm"
-	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -19,16 +16,12 @@ import (
 
 // 配置信息全局变量
 var (
-	ConfBase        = new(BaseConfig)
-	DBMapPool       map[string]*sqlx.DB
-	GORMMapPool     map[string]*gorm.DB
-	DBDefaultPool   *sql.DB
-	GORMDefaultPool *gorm.DB
-	ConfMySQL       = new(MySQLConfig)
-	ConfMySQLMap    = new(MySQLMapConfig)
-	ConfRedis       = new(RedisConfig)
-	ConfRedisMap    = new(RedisMapConfig)
-	ViperConfMap    map[string]*viper.Viper
+	ConfBase     = new(BaseConfig)
+	ConfMySQL    = new(MySQLConfig)
+	ConfMySQLMap = new(MySQLMapConfig)
+	ConfRedis    = new(RedisConfig)
+	ConfRedisMap = new(RedisMapConfig)
+	ViperConfMap map[string]*viper.Viper
 )
 
 // BaseConfig 应用程序配置信息
@@ -155,6 +148,7 @@ func initLog(cfg *LogConfig) (err error) {
 		core = zapcore.NewTee( // 指定两个输出位置
 			// 第一个输出　和下面的配置一样，以 JSON 方式写入到日志文件里面
 			zapcore.NewCore(encoder, writerSyncer, l),
+
 			// 第二个输出
 			// consoleEncoder 指定console编码器
 			// zapcore.Lock(os.Stdout) 指定输出位置是标准输出，给它转换成符合条件的 WriteSyncer
