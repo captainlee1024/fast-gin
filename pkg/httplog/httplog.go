@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	mylog "github.com/captainlee1024/fast-gin/log"
+	mylog "github.com/captainlee1024/fast-gin/internal/fastgin/log"
 )
 
 // HTTPGET 带有日志信息日志信息

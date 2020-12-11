@@ -33,7 +33,7 @@ func GenToken(userID int64, username string) (string, error) {
 			ExpiresAt: time.Now().Add(TokenExpireDuration).Unix(), // 过期时间
 			// 从配置文件设置过期时间
 			//ExpiresAt: time.Now().Add(time.Duration(viper.GetInt("auth.jwt_expire")) * time.Hour).Unix()
-			Issuer: "bluebell", // 签发人
+			Issuer: "fastgin", // 签发人
 		},
 	}
 	// 使用指定的签名方法创建对象
