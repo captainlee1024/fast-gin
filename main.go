@@ -2,8 +2,15 @@
 package main
 
 import (
-	"errors"
+	"context"
+	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
+
+	"github.com/captainlee1024/fast-gin/router"
 
 	"github.com/captainlee1024/fast-gin/dao/mysql"
 	"github.com/captainlee1024/fast-gin/dao/redis"
@@ -62,29 +69,71 @@ func main() {
 	defer defaultConn.Close()
 
 	// 5. 注册路由
+	r := router.SetUp()
+
 	// 6. 启动服务（开启平滑下线）
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%v", settings.ConfBase.Port),
+		Handler: r,
+	}
 
-	// test debug
-	mylog.Log.Debug("/debug", mylog.NewTrace(), mylog.DLTagUndefind,
-		map[string]interface{}{
-			"message":  "debug 测试替换日志默认Caller",
-			"error":    errors.New("text string"),
-			"balabala": "xxxx"})
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			mylog.Log.Fatal("listen", mylog.NewTrace(), mylog.DLTagUndefind, map[string]interface{}{
+				"err": err,
+			})
+		}
+	}()
 
-	// todo sth
-	mylog.Log.Info("/test", mylog.NewTrace(), mylog.DLTagUndefind,
-		map[string]interface{}{
-			"message":  "todo sth",
-			"error":    errors.New("text string"),
-			"balabala": "xxxx"})
+	// 等待中断信号来优雅关闭服务器，为关闭服务器操作设置一个5秒的延时
+	quit := make(chan os.Signal, 1)
+	// kill 默认会发送 syscall.SIGTERM 信号
+	// kill -2 发送 syscall.SIGINT 信号，我们常用的Ctrl+C就是触发系统SIGINT信号
+	// kill -9 发送 syscall.SIGKILL 信号，但是不能被捕获，所以不需要添加它
+	// signal.Notify把收到的 syscall.SIGINT或syscall.SIGTERM 信号转发给quit
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM) // 此处不会阻塞
+	<-quit
 
-	// test error
-	mylog.Log.Error("/error", mylog.NewTrace(), mylog.DLTagUndefind,
-		map[string]interface{}{
-			"message":  "error 级别日志测试",
-			"error":    errors.New("text string"),
-			"balabala": "xxxx"})
+	shoutdownTrace := mylog.NewTrace()
+	mylog.Log.Info("Shoutdown", shoutdownTrace, mylog.DLTagUndefind, map[string]interface{}{
+		"msg": "Shoutdown Server ...",
+	})
 
-	time.Sleep(time.Second * 10)
+	// 创建一个 5 秒超时的 context
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		mylog.Log.Fatal("Shoutdown", shoutdownTrace, mylog.DLTagUndefind, map[string]interface{}{
+			"error": err,
+		})
+	}
 
+	mylog.Log.Info("Server exiting", shoutdownTrace, mylog.DLTagUndefind, map[string]interface{}{
+		"msg": "Server exiting",
+	})
+
+	/*
+		// test debug
+		mylog.Log.Debug("/debug", mylog.NewTrace(), mylog.DLTagUndefind,
+			map[string]interface{}{
+				"message":  "debug 测试替换日志默认Caller",
+				"error":    errors.New("text string"),
+				"balabala": "xxxx"})
+
+		// todo sth
+		mylog.Log.Info("/test", mylog.NewTrace(), mylog.DLTagUndefind,
+			map[string]interface{}{
+				"message":  "todo sth",
+				"error":    errors.New("text string"),
+				"balabala": "xxxx"})
+
+		// test error
+		mylog.Log.Error("/error", mylog.NewTrace(), mylog.DLTagUndefind,
+			map[string]interface{}{
+				"message":  "error 级别日志测试",
+				"error":    errors.New("text string"),
+				"balabala": "xxxx"})
+
+		// time.Sleep(time.Second * 10)
+	*/
 }
