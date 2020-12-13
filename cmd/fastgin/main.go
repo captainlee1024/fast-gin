@@ -136,21 +136,21 @@ func main() {
 	})
 
 	/*
-		// test debug
+		// test mylog debug
 		mylog.Log.Debug("/debug", mylog.NewTrace(), mylog.DLTagUndefind,
 			map[string]interface{}{
 				"message":  "debug 测试替换日志默认Caller",
 				"error":    errors.New("text string"),
 				"balabala": "xxxx"})
 
-		// todo sth
+		// test mylog info
 		mylog.Log.Info("/test", mylog.NewTrace(), mylog.DLTagUndefind,
 			map[string]interface{}{
 				"message":  "todo sth",
 				"error":    errors.New("text string"),
 				"balabala": "xxxx"})
 
-		// test error
+		// test mylog error
 		mylog.Log.Error("/error", mylog.NewTrace(), mylog.DLTagUndefind,
 			map[string]interface{}{
 				"message":  "error 级别日志测试",
