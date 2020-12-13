@@ -44,7 +44,7 @@ func RequestInLog(c *gin.Context) {
 	// write body back
 	c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
 
-	mylog.Log.Info(c.Request.URL.Path, traceContext, mylog.DLTagRequestIn, map[string]interface{}{
+	mylog.Log.Info(c.Request.Method + "  " + c.Request.URL.Path, traceContext, mylog.DLTagRequestIn, map[string]interface{}{
 		"uri":    c.Request.RequestURI,
 		"method": c.Request.Method,
 		"args":   c.Request.PostForm,
@@ -62,12 +62,12 @@ func RequestOutLog(c *gin.Context) {
 	startExecTime := st.(time.Time)
 	traceContext := GetGinTraceContext(c)
 
-	mylog.Log.Info(c.Request.URL.Path, traceContext, mylog.DLTagRequestOut, map[string]interface{}{
+	mylog.Log.Info(c.Request.Method + "  " + c.Request.URL.Path, traceContext, mylog.DLTagRequestOut, map[string]interface{}{
 		"status":     c.Writer.Status(),
 		"method":     c.Request.Method,
 		"uri":        c.Request.RequestURI,
 		"response":   response,
-		"user-agent": c.Request.UserAgent(),
+		//"user-agent": c.Request.UserAgent(),
 		"proc_time":  endExecTime.Sub(startExecTime),
 	})
 }

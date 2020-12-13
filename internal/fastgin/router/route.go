@@ -19,22 +19,13 @@ func SetUp() *gin.Engine {
 	r := gin.New()
 
 	v1 := r.Group("/fastgin")
-
 	v1.Use(
 		middleware.RequestLog(),
 		middleware.GinRecovery(true),
 		middleware.TranslationMiddleware(),
-		middleware.JWTAuthMiddleware(),
 	)
-
 	{
 		controller.FastGinRegister(v1)
-	}
-
-	{
-		v1.GET("/ping", func(c *gin.Context) {
-			middleware.ResponseSuccess(c, "pong")
-		})
 	}
 
 	// 非登录接口
@@ -46,21 +37,29 @@ func SetUp() *gin.Engine {
 		middleware.IPAuthMiddleware(),
 	)
 	{
-		apiNormalGroup.GET("/", func(c *gin.Context) {
-			jwt, _ := jwt.GenToken(int64(11), "jwt")
+		apiNormalGroup.GET("/jwt", func(c *gin.Context) {
+			// 注意：保存到 Redis 的时候，Key 是转换成 string 类型之后的 ID 这里是 11
+			jwt, _ := jwt.GenToken(int64(11), "Jojo")
 			middleware.ResponseSuccess(c, jwt)
 			return
 		})
 	}
 
 	// 登录接口
-	apiAuthGroup := r.Group("api")
+	apiAuthGroup := r.Group("/api")
 	apiAuthGroup.Use(
 		middleware.RequestLog(),
 		middleware.GinRecovery(true),
 		middleware.TranslationMiddleware(),
 		middleware.JWTAuthMiddleware(),
 	)
+	{
+		apiAuthGroup.GET("/jwtauth", func(c *gin.Context) {
+			middleware.ResponseSuccess(c, "JWTAuth Success!")
+			return
+		})
+
+	}
 
 	return r
 }

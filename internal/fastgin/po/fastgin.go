@@ -3,7 +3,7 @@ package po
 
 import "time"
 
-// FastGin fastgin 测试结构体
+// FastGin fastgin 持久化实体
 type FastGin struct {
 	FastGinID  int       `db:"fast_gin_id"`
 	DemoName   string    `db:"demo_name"`
