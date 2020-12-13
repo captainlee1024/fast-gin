@@ -127,7 +127,8 @@ func (l *Logger) Debug(msg string, trace *TraceContext, dltag string, m map[stri
 	// m[_childSpanID] = trace.CSpanID
 	// m[_spanID] = trace.SpandID
 	// l.L.Debug(parseParams(m))
-	l.L.Debug(msg, zap.String("msg", parseParams(m)),
+	l.L.Debug(msg,
+		zap.String("msg", parseParams(m)),
 		zap.String(_traceID, trace.TraceID),
 		zap.String(_spanID, trace.SpandID),
 		zap.String(_childSpanID, trace.CSpanID))

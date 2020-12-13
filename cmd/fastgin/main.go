@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/captainlee1024/fast-gin/pkg/snowflake"
 	"log"
 	"net/http"
 	"os"
@@ -10,8 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/captainlee1024/fast-gin/internal/fastgin/dao/mysql"
-	"github.com/captainlee1024/fast-gin/internal/fastgin/dao/redis"
+	"github.com/captainlee1024/fast-gin/internal/fastgin/data/mysql"
+	"github.com/captainlee1024/fast-gin/internal/fastgin/data/redis"
 	mylog "github.com/captainlee1024/fast-gin/internal/fastgin/log"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/router"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/settings"
@@ -56,9 +57,11 @@ func main() {
 		panic(err)
 	}
 
+	trace := mylog.NewTrace()
+
 	// 3. 初始化 MySQL 连接
 	if err := mysql.InitDBPool(); err != nil {
-		mylog.Log.Error("mysql", mylog.NewTrace(), mylog.DLTagUndefind, map[string]interface{}{
+		mylog.Log.Error("mysql", trace, mylog.DLTagUndefind, map[string]interface{}{
 			"error": err,
 		})
 	}
@@ -74,11 +77,19 @@ func main() {
 	// 4. 初始化 Redis 连接
 	defaultConn, err := redis.ConnFactory("default")
 	if err != nil {
-		mylog.Log.Error("redis", mylog.NewTrace(), mylog.DLTagUndefind, map[string]interface{}{
+		mylog.Log.Error("redis", trace, mylog.DLTagUndefind, map[string]interface{}{
 			"error": err,
 		})
 	}
 	defer defaultConn.Close()
+
+	// 初始化雪花算法
+	if err := snowflake.Init(settings.ConfBase.StartTime, settings.ConfBase.MachineID); err != nil {
+		mylog.Log.Error("initSnowflake", trace, mylog.DLTagUndefind, map[string]interface{}{
+			"error": err,
+		})
+		return
+	}
 
 	// 5. 注册路由
 	r := router.SetUp()

@@ -115,26 +115,100 @@ func Close() error {
 	return nil
 }
 
-// DBPoolLogQuery 获取日志
-func DBPoolLogQuery(trace *mylog.TraceContext, sqlDB *sqlx.DB, query string,
+// SqlxLogGet 单行查询并记录日志
+func SqlxLogGet(trace *mylog.TraceContext, sqlDB *sqlx.DB, dest interface{}, query string,
+	args ...interface{}) error {
+	startExecTime := time.Now()
+	err := sqlDB.Get(dest, query, args...)
+	endExecTime := time.Now()
+	subTime := endExecTime.Sub(startExecTime).Seconds()
+
+	sqlxLog(trace, query, subTime, err, args...)
+
+	return err
+}
+
+// SqlxLogSelect 多行查询并记录日志
+func SqlxLogSelect(trace *mylog.TraceContext, sqlDB *sqlx.DB, dest interface{}, query string,
+	args ...interface{}) error {
+	startExecTime := time.Now()
+	err := sqlDB.Select(dest, query, args...)
+	endExecTime := time.Now()
+	subTime := endExecTime.Sub(startExecTime).Seconds()
+
+	sqlxLog(trace, query, subTime, err, args...)
+
+	return err
+}
+
+// SqlxLogQuery 查询并记录日志
+func SqlxLogQuery(trace *mylog.TraceContext, sqlDB *sqlx.DB, query string,
 	args ...interface{}) (*sql.Rows, error) {
 	startExecTime := time.Now()
 	rows, err := sqlDB.Query(query, args...)
 	endExecTime := time.Now()
+	subTime := endExecTime.Sub(startExecTime).Seconds()
+
+	sqlxLog(trace, query, subTime, err, args...)
+
+	return rows, err
+}
+
+// SqlxLogNamedQuery 查询并记录日志
+func SqlxLogNamedQuery(trace *mylog.TraceContext, sqlDB *sqlx.DB, query string,
+	arg interface{}) (*sqlx.Rows, error) {
+	startExecTime := time.Now()
+	rows, err := sqlDB.NamedQuery(query, arg)
+	endExecTime := time.Now()
+	subTime := endExecTime.Sub(startExecTime).Seconds()
+
+	sqlxLog(trace, query, subTime, err, arg)
+
+	return rows, err
+}
+
+// SqlxLogExec 执行 sql 并记录日志
+func SqlxLogExec(trace *mylog.TraceContext, sqlDB *sqlx.DB, query string,
+	args ...interface{}) (sql.Result, error) {
+	startExecTime := time.Now()
+	ret, err := sqlDB.Exec(query, args...)
+	endExecTime := time.Now()
+	subTime := endExecTime.Sub(startExecTime).Seconds()
+
+	sqlxLog(trace, query, subTime, err, args...)
+
+	return ret, err
+}
+
+// SqlxLogNamedExec 执行 sql 并记录日志
+func SqlxLogNamedExec(trace *mylog.TraceContext, sqlDB *sqlx.DB, query string,
+	arg interface{}) (sql.Result, error) {
+	startExecTime := time.Now()
+	ret, err := sqlDB.NamedExec(query, arg)
+	endExecTime := time.Now()
+	subTime := endExecTime.Sub(startExecTime).Seconds()
+
+	sqlxLog(trace, query, subTime, err, arg)
+
+	return ret, err
+}
+
+// sqlx 打印 sql 日志
+func sqlxLog(trace *mylog.TraceContext, query string, subTime float64, err error,
+	args ...interface{}) {
 	if err != nil {
-		mylog.Log.Error("sql", trace, mylog.DLTagMySQLFailed, map[string]interface{}{
+		mylog.Log.Error("sqlx", trace, mylog.DLTagMySQLFailed, map[string]interface{}{
 			"sql":       query,
 			"bind":      args,
-			"proc_time": fmt.Sprintf("%f", endExecTime.Sub(startExecTime).Seconds()),
+			"proc_time": fmt.Sprintf("%f", subTime),
 		})
 	} else {
-		mylog.Log.Info("sql", trace, mylog.DLTagMySQLSuccess, map[string]interface{}{
+		mylog.Log.Info("sqlx", trace, mylog.DLTagMySQLSuccess, map[string]interface{}{
 			"sql":       query,
 			"bind":      args,
-			"proc_time": fmt.Sprintf("%f", endExecTime.Sub(startExecTime).Seconds()),
+			"proc_time": fmt.Sprintf("%f", subTime),
 		})
 	}
-	return rows, err
 }
 
 // GormLogger MySQL 日志打印类

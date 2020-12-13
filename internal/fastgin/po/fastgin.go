@@ -5,7 +5,7 @@ import "time"
 
 // FastGin fastgin 持久化实体
 type FastGin struct {
-	FastGinID  int       `db:"fast_gin_id"`
+	FastGinID  int64     `db:"fast_gin_id"`
 	DemoName   string    `db:"demo_name"`
 	Info       string    `db:"info"`
 	CreateTime time.Time `db:"create_time"`

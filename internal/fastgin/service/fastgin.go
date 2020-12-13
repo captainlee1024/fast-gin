@@ -5,6 +5,8 @@ package service
 import (
 	"errors"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/do"
+	"github.com/captainlee1024/fast-gin/internal/pkg/public"
+	"github.com/gin-gonic/gin"
 )
 
 // FastGinDo 业务实体 放在do 层了
@@ -15,9 +17,11 @@ import (
 
 // FastGinDoRepo 存储接口
 type FastGinDoRepo interface {
-	SaveFastGin(*do.FastGinDo) error
-	GetFastGin(*do.FastGinDo) (*do.FastGinDo, error)
-	ListFastGin() ([]*do.FastGinDo, error)
+	SaveFastGin(*do.FastGinDo, *gin.Context) error
+	GetFastGin(*do.FastGinDo, *gin.Context) (*do.FastGinDo, error)
+	GetFastGinList(int, int, *gin.Context) ([]*do.FastGinDo, error)
+	UpdateFastGin(*do.FastGinDo, *gin.Context) error
+	DeleteFastGin(*do.FastGinDo, *gin.Context) error
 }
 
 // FastGinUsecase is .
@@ -31,44 +35,74 @@ func NewFastGinUsercase(repo FastGinDoRepo) *FastGinUsecase {
 }
 
 // IndexBiz fastgin 欢迎页面
-func (uc *FastGinUsecase) IndexBiz() (data string, err error) {
+func (uc *FastGinUsecase) IndexBiz(c *gin.Context) (data string, err error) {
 	return "Welcome to FastGin!", nil
 }
 
 // PingPong 处理 ping 业务
-func (uc *FastGinUsecase) PingPong() (data string, err error) {
+func (uc *FastGinUsecase) PingPong(c *gin.Context) (data string, err error) {
 	// logic business
 	return "Pong", nil
 }
 
 // ErrorBiz 用于测试 ResponseError
-func (uc *FastGinUsecase) ErrorBiz() (data string, err error) {
+func (uc *FastGinUsecase) ErrorBiz(c *gin.Context) (data string, err error) {
 	// logic business
 	return "", errors.New("test Middleware ResponseError...")
 }
 
 // Create 添加一个 FastGin
-func (uc *FastGinUsecase) Create(fdo *do.FastGinDo) (err error) {
+func (uc *FastGinUsecase) AddFastGin(fdo *do.FastGinDo, c *gin.Context) (err error) {
 	// logic business
-	return uc.repository.SaveFastGin(fdo)
+	if !fdo.DemoNameIsOk() && !fdo.InfoIsOk() {
+		return errors.New("AddFastGin fdo DemoName/Info 不能为空！")
+	}
+	return uc.repository.SaveFastGin(fdo, c)
 }
 
 // Get 获取 FastGin
-func (uc *FastGinUsecase) Get(fdo *do.FastGinDo) (fastGin *do.FastGinDo, err error) {
+func (uc *FastGinUsecase) GetFastGin(fdo *do.FastGinDo, c *gin.Context) (fastGin *do.FastGinDo, err error) {
 	fastGin = &do.FastGinDo{}
-	fastGin, err = uc.repository.GetFastGin(fdo)
+	if !fdo.InfoIsOk() && !fdo.DemoNameIsOk() {
+		return nil, errors.New("GetFastGin fdo DemoName/Info 至少有一个不为空")
+	}
+	fastGin, err = uc.repository.GetFastGin(fdo, c)
 	return
 }
 
 // ListFastGin 获取所有 FastGin
-func (uc *FastGinUsecase) ListFastGin(fdo *do.FastGinDo) (listFastGin []*do.FastGinDo, err error) {
+func (uc *FastGinUsecase) ListFastGin(fgListDo *do.FastGinListPageDo, c *gin.Context) (listFastGin []*do.FastGinDo, err error) {
+	// 分页处理
+	if !fgListDo.PageIsOk() {
+		page, _ := public.GetPageInfo(c)
+		fgListDo.Page = page
+	}
+	if !fgListDo.PageSizeIsOk() {
+		_, size := public.GetPageInfo(c)
+		fgListDo.PageSize = size
+	}
 
-	fastGins, err := uc.repository.ListFastGin()
+	fastGins, err := uc.repository.GetFastGinList(fgListDo.Page, fgListDo.PageSize, c)
 	if err != nil {
 		return nil, err
 	}
+
 	// 初始化返回值定义的变量，那里只是声明，并没有申请内存
 	listFastGin = make([]*do.FastGinDo, 0, len(fastGins))
+	//for _, fastGin := range fastGins {
+	//	listFastGin = append(listFastGin, fastGin)
+	//}
 	listFastGin = fastGins
-	return
+	return listFastGin, err
+}
+
+// EditFastGin 修改信息
+func (uc *FastGinUsecase) EditFastGin(fdo *do.FastGinDo, c *gin.Context) (err error) {
+	return uc.repository.UpdateFastGin(fdo, c)
+
+}
+
+// RemvoeFastGin 删除一个 FastGin
+func (uc *FastGinUsecase) RemoveFastGin(fdo *do.FastGinDo, c *gin.Context) (err error) {
+	return uc.repository.DeleteFastGin(fdo, c)
 }

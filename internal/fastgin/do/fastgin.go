@@ -10,17 +10,43 @@ package do
 
 // FastGinDo 业务实体
 type FastGinDo struct {
-	DemoName string
-	Info     string
+	FastGinID int64
+	DemoName  string
+	Info      string
 }
 
-// InfoIsOk 用于辅助逻辑处理层逻辑校验
-// 这里的校验逻辑是 Info 字段不能为空
+// IDIsOk 用于辅助逻辑处理层逻辑校验
+func (fastGin *FastGinDo) IDIsOk() bool {
+	return fastGin.FastGinID != 0
+}
+
+//InfoIsOk 用于辅助逻辑处理层逻辑校验
+//这里的校验逻辑是 Info 字段不能为空
 func (fastgin *FastGinDo) InfoIsOk() bool {
 	return fastgin.Info != ""
 }
 
-// DemoNameIsOk 用户名是否存在
+//DemoNameIsOk 用户名是否存在
 func (fastgin *FastGinDo) DemoNameIsOk() bool {
 	return fastgin.DemoName != ""
+}
+
+// FastGinListPageDo
+type FastGinListPageDo struct {
+	PageSize  int
+	Page      int
+	FastGinID int64
+	DemoName  string
+}
+
+// PageSizeIsOk 是否设置了每页数量
+// 如果设置了返回 true，否则返回 false
+func (f *FastGinListPageDo) PageSizeIsOk() bool {
+	return f.PageSize == 0
+}
+
+// PageIsOk 是否设置了从第几页开始查询
+// 如果设置了返回 true，否则返回 false
+func (f *FastGinListPageDo) PageIsOk() bool {
+	return f.Page == 0
 }

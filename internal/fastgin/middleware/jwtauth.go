@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/captainlee1024/fast-gin/internal/fastgin/dao/redis"
+	"github.com/captainlee1024/fast-gin/internal/fastgin/data/redis"
 	red "github.com/garyburd/redigo/redis"
 
 	"github.com/captainlee1024/fast-gin/pkg/jwt"

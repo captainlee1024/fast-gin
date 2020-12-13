@@ -18,6 +18,8 @@ package controller
 
 import (
 	"github.com/captainlee1024/fast-gin/internal/fastgin/data"
+	"github.com/captainlee1024/fast-gin/internal/fastgin/do"
+	"github.com/captainlee1024/fast-gin/internal/fastgin/dto"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/service"
 
 	v1 "github.com/captainlee1024/fast-gin/api/fastgin/v1"
@@ -31,9 +33,15 @@ func FastGinRegister(router *gin.RouterGroup) {
 	fus := service.NewFastGinUsercase(repo)
 	fastGin := NewFastGinController(fus)
 
-	router.GET("/", fastGin.Index)
-	router.GET("error", fastGin.Error)
-	router.GET("/ping", fastGin.Ping)
+	router.GET("/", fastGin.IndexHandler)
+	router.GET("error", fastGin.ErrorHandler)
+	router.GET("/ping", fastGin.PingHandler)
+	router.GET("/listpage", fastGin.GetFastGinListHandler)
+	router.POST("/add", fastGin.AddFastGinHandler)
+	router.POST("/get", fastGin.GetFastGinHandler)
+	router.POST("/edit", fastGin.EditFastGinHandler)
+	router.POST("/remove", fastGin.RemoveFastGinHandler)
+
 }
 
 // FastGinController 是 FastGin API 的实现类
@@ -48,31 +56,138 @@ func NewFastGinController(fus *service.FastGinUsecase) *FastGinController {
 }
 
 // Index 处理器
-func (fastGin *FastGinController) Index(c *gin.Context) {
-	data, err := fastGin.fus.IndexBiz()
+func (fastGin *FastGinController) IndexHandler(c *gin.Context) {
+	bizData, err := fastGin.fus.IndexBiz(c)
 	if err != nil {
 		middleware.ResponseError(c, 2000, err)
 	}
-	middleware.ResponseSuccess(c, data)
-	return
+	middleware.ResponseSuccess(c, bizData)
 }
 
 // Ping 处理器
-func (fastGin *FastGinController) Ping(c *gin.Context) {
-	data, err := fastGin.fus.PingPong()
+func (fastGin *FastGinController) PingHandler(c *gin.Context) {
+	bizData, err := fastGin.fus.PingPong(c)
 	if err != nil {
 		middleware.ResponseError(c, 2000, err)
 	}
-	middleware.ResponseSuccess(c, data)
-	return
+	middleware.ResponseSuccess(c, bizData)
 }
 
 // Error 处理器
-func (fastGin *FastGinController) Error(c *gin.Context) {
-	data, err := fastGin.fus.ErrorBiz()
+func (fastGin *FastGinController) ErrorHandler(c *gin.Context) {
+	bizData, err := fastGin.fus.ErrorBiz(c)
 	if err != nil {
 		middleware.ResponseError(c, 2000, err)
 	}
-	middleware.ResponseSuccess(c, data)
-	return
+	middleware.ResponseSuccess(c, bizData)
+}
+
+// AddFastGinHandler 创建一个 FastGin
+func (fastGin *FastGinController) AddFastGinHandler(c *gin.Context) {
+	fgDto := new(dto.FastGinDto)
+	if err := fgDto.BindingValidParams(c); err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+
+	fgDo := &do.FastGinDo{
+		DemoName: fgDto.DemoName,
+		Info:     fgDto.Info,
+	}
+	err := fastGin.fus.AddFastGin(fgDo, c)
+	if err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+	middleware.ResponseSuccess(c, "Add FastGin success!")
+}
+
+func (fastGin *FastGinController) GetFastGinHandler(c *gin.Context) {
+	fgDto := new(dto.FastGinDto)
+	if err := fgDto.BindingValidParams(c); err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+
+	fgDo := &do.FastGinDo{
+		FastGinID: fgDto.FastGinID,
+		DemoName:  fgDto.DemoName,
+		Info:      fgDto.Info,
+	}
+
+	fgDo, err := fastGin.fus.GetFastGin(fgDo, c)
+	if err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+	requestDto := &dto.FastGinDto{
+		DemoName: fgDo.DemoName,
+		Info:     fgDo.Info,
+	}
+
+	middleware.ResponseSuccess(c, requestDto)
+}
+
+func (fastGin *FastGinController) GetFastGinListHandler(c *gin.Context) {
+	fgListDto := new(dto.FastGinListPageDto)
+	if err := fgListDto.BindingValidParems(c); err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+
+	fgListDo := &do.FastGinListPageDo{
+		Page:     fgListDto.Page,
+		PageSize: fgListDto.PageSize,
+	}
+	fgDtos, err := fastGin.fus.ListFastGin(fgListDo, c)
+	if err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+	//fgDto := new(fgd)
+
+	middleware.ResponseSuccess(c, fgDtos)
+}
+
+// EditFastGinHandler 修改 FastGin 信息
+func (fastGin *FastGinController) EditFastGinHandler(c *gin.Context) {
+	fgDto := new(dto.FastGinDto)
+	if err := fgDto.BindingValidParams(c); err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+
+	fgDo := &do.FastGinDo{
+		FastGinID: fgDto.FastGinID,
+		DemoName:  fgDto.DemoName,
+		Info:      fgDto.Info,
+	}
+
+	err := fastGin.fus.EditFastGin(fgDo, c)
+	if err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+
+	middleware.ResponseSuccess(c, "success! 信息修改成功！")
+}
+
+// RemoveFastGinHandler 删除 FastGin
+func (fastGin *FastGinController) RemoveFastGinHandler(c *gin.Context) {
+	fgDto := new(dto.FastGinDto)
+	if err := fgDto.BindingValidParams(c); err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+
+	fgDo := &do.FastGinDo{
+		FastGinID: fgDto.FastGinID,
+	}
+
+	err := fastGin.fus.RemoveFastGin(fgDo, c)
+	if err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+	middleware.ResponseSuccess(c, "success! 删除成功！")
 }
