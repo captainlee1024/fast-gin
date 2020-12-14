@@ -17,17 +17,18 @@ A 如果不采用构造函数、属性/接口或者工厂模式等方式, 而是
 package controller
 
 import (
+	"errors"
+	v1 "github.com/captainlee1024/fast-gin/api/fastgin/v1"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/data"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/do"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/dto"
-	"github.com/captainlee1024/fast-gin/internal/fastgin/service"
-
-	v1 "github.com/captainlee1024/fast-gin/api/fastgin/v1"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/middleware"
+	"github.com/captainlee1024/fast-gin/internal/fastgin/service"
 	"github.com/gin-gonic/gin"
 )
 
 // FastGinRegister 注册路由处理器
+// 这种方式不方便给同一个 controller 文件里的各个服务进行分组，只能分到同一组
 func FastGinRegister(router *gin.RouterGroup) {
 	repo := data.NewFastGinRepo()
 	fus := service.NewFastGinUsercase(repo)
@@ -44,9 +45,10 @@ func FastGinRegister(router *gin.RouterGroup) {
 
 }
 
-// FastGinController 是 FastGin API 的实现类
+// FastGinController 是 FastGin API 的实现类。
+// must be embedded to have forward compatible implementations.
 type FastGinController struct {
-	v1.FastGinServer
+	v1.UnimplementedFastGinServer
 	fus *service.FastGinUsecase
 }
 
@@ -54,6 +56,10 @@ type FastGinController struct {
 func NewFastGinController(fus *service.FastGinUsecase) *FastGinController {
 	return &FastGinController{fus: fus}
 }
+
+//func NewFastGinController2() *FastGinController {
+//	return NewFastGinController(service.NewFastGinUsercase(data.NewFastGinRepo()))
+//}
 
 // Index 处理器
 func (fastGin *FastGinController) IndexHandler(c *gin.Context) {
@@ -120,12 +126,12 @@ func (fastGin *FastGinController) GetFastGinHandler(c *gin.Context) {
 		middleware.ResponseError(c, 2001, err)
 		return
 	}
-	requestDto := &dto.FastGinDto{
+	responseDto := &dto.FastGinDto{
 		DemoName: fgDo.DemoName,
 		Info:     fgDo.Info,
 	}
 
-	middleware.ResponseSuccess(c, requestDto)
+	middleware.ResponseSuccess(c, responseDto)
 }
 
 func (fastGin *FastGinController) GetFastGinListHandler(c *gin.Context) {
@@ -190,4 +196,63 @@ func (fastGin *FastGinController) RemoveFastGinHandler(c *gin.Context) {
 		return
 	}
 	middleware.ResponseSuccess(c, "success! 删除成功！")
+}
+
+func (fastGin *FastGinController) GetJWTTokenHandler(c *gin.Context) {
+	// 1. 参数校验
+	fgDto := new(dto.FastGinDto)
+	if err := fgDto.BindingValidParams(c); err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+
+	// 对象转换
+	// dto -> do
+	fgDo := &do.FastGinDo{
+		FastGinID: fgDto.FastGinID,
+	}
+
+	fgDo, err := fastGin.fus.GetJWTToken(fgDo, c)
+	if err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+
+	// 对象转换
+	// dto -> do
+	responseDto := &dto.FastGinDto{
+		FastGinID: fgDo.FastGinID,
+		DemoName:  fgDo.DemoName,
+	}
+	middleware.ResponseSuccess(c, responseDto)
+}
+
+// AuthFastGinJWTHandler 测试 JWT 认证中间件的服务
+func (fastGin *FastGinController) AuthFastGinJWTHandler(c *gin.Context) {
+	// 1. 参数校验
+	fgDto := new(dto.FastGinDto)
+	if err := fgDto.BindingValidParams(c); err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+
+	// 2. 对象转换
+	// dto -> do
+	fgDo := &do.FastGinDo{
+		FastGinID: fgDto.FastGinID,
+		DemoName:  fgDto.DemoName,
+	}
+
+	// 3. 逻辑处理
+	err := fastGin.fus.AuthJWT(fgDo, c)
+	if err != nil {
+		middleware.ResponseError(c, 2001, errors.New("认证失败"))
+		return
+	}
+	middleware.ResponseSuccess(c, "你已经通过了JWT的认证哦！")
+}
+
+// AuthFastGinSessionHandler 测试 Session 认证中间件的服务
+func (fastgin *FastGinController) AuthFastGinSessionHandler(c *gin.Context) {
+	middleware.ResponseSuccess(c, "你已经通过了 Session 认证哦！")
 }

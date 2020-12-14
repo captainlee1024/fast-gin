@@ -62,8 +62,8 @@ func TranslationMiddleware() gin.HandlerFunc {
 				})
 			break
 		}
-		c.Set(public.TranslatorKey, trans)
-		c.Set(public.ValidatorKey, val)
+		c.Set(public.CtxTranslatorKey, trans)
+		c.Set(public.CtxValidatorKey, val)
 		c.Next()
 	}
 }

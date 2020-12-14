@@ -1,11 +1,16 @@
 package data
 
 import (
+	"database/sql"
+	"errors"
+	red "github.com/garyburd/redigo/redis"
+
 	"github.com/captainlee1024/fast-gin/internal/fastgin/data/mysql"
+	"github.com/captainlee1024/fast-gin/internal/fastgin/data/redis"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/do"
-	"github.com/captainlee1024/fast-gin/internal/fastgin/middleware"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/po"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/service"
+	"github.com/captainlee1024/fast-gin/internal/pkg/public"
 	"github.com/captainlee1024/fast-gin/pkg/snowflake"
 	"github.com/gin-gonic/gin"
 	"time"
@@ -41,12 +46,44 @@ func (fg *fastGinRepo) SaveFastGin(fgDo *do.FastGinDo, c *gin.Context) (err erro
 	sqlStr := `INSERT INTO fast_gin(fast_gin_id, demo_name, info, create_time, update_time)
 			VALUES(:fast_gin_id, :demo_name, :info, :create_time, :update_time)`
 
-	trace := middleware.GetGinTraceContext(c)
+	trace := public.GetGinTraceContext(c)
 	_, err = mysql.SqlxLogNamedExec(trace, db, sqlStr, fgPo)
 	//if err != nil {
 	//	return err
 	//}
 	return
+}
+
+func (fg *fastGinRepo) GetFastGinByID(ID int64, c *gin.Context) (fastGin *do.FastGinDo, err error) {
+	db, err := mysql.GetDBPool("default")
+	if err != nil {
+		return nil, err
+	}
+
+	// do -> po 这里省略
+
+	trace := public.GetGinTraceContext(c)
+	sqlStr := `SELECT demo_name
+		FROM fast_gin
+		WHERE fast_gin_id = ?`
+
+	fastGinPo := &po.FastGin{
+		FastGinID: ID,
+	}
+	err = mysql.SqlxLogGet(trace, db, fastGinPo, sqlStr, fastGinPo.FastGinID)
+	if err == sql.ErrNoRows {
+		return nil, errors.New("ID不存在，不能为您生成 JWTToken！")
+	}
+	if err != nil {
+		// 查询数据库失败
+		return nil, err
+	}
+
+	fastGin = &do.FastGinDo{
+		FastGinID: ID,
+		DemoName:  fastGinPo.DemoName,
+	}
+	return fastGin, nil
 }
 
 func (fg *fastGinRepo) GetFastGin(fgDo *do.FastGinDo, c *gin.Context) (fastGin *do.FastGinDo, err error) {
@@ -56,7 +93,7 @@ func (fg *fastGinRepo) GetFastGin(fgDo *do.FastGinDo, c *gin.Context) (fastGin *
 	}
 	// do -> po
 
-	trace := middleware.GetGinTraceContext(c)
+	trace := public.GetGinTraceContext(c)
 	sqlStr := `SELECT fast_gin_id, demo_name, info
 			FROM fast_gin
 			WHERE demo_name = ?`
@@ -105,7 +142,7 @@ func (fg *fastGinRepo) GetFastGinList(page, size int, c *gin.Context) (listFastG
 
 	listFastGinPo := make([]*po.FastGin, 0, 2)
 
-	trace := middleware.GetGinTraceContext(c)
+	trace := public.GetGinTraceContext(c)
 	sqlStr := `SELECT fast_gin_id, demo_name, info
 		FROM fast_gin
 		LIMIT ?,?`
@@ -145,7 +182,7 @@ func (fg *fastGinRepo) UpdateFastGin(fgDo *do.FastGinDo, c *gin.Context) (err er
 		UpdateTime: currentTime,
 	}
 
-	trace := middleware.GetGinTraceContext(c)
+	trace := public.GetGinTraceContext(c)
 	sqlStr := `UPDATE fast_gin
 			SET demo_name=?, info=?, update_time=?
 			WHERE fast_gin_id=?`
@@ -166,7 +203,7 @@ func (fg *fastGinRepo) DeleteFastGin(fgDo *do.FastGinDo, c *gin.Context) (err er
 	fgPo := &po.FastGin{
 		FastGinID: fgDo.FastGinID,
 	}
-	trace := middleware.GetGinTraceContext(c)
+	trace := public.GetGinTraceContext(c)
 	sqlStr := `DELETE FROM fast_gin
 			WHERE fast_gin_id = ?`
 	_, err = mysql.SqlxLogExec(trace, db, sqlStr, fgPo.FastGinID)
@@ -175,5 +212,33 @@ func (fg *fastGinRepo) DeleteFastGin(fgDo *do.FastGinDo, c *gin.Context) (err er
 	}
 	// 返回受影响行数
 	//_, err = ret.RowsAffected()
+	return
+}
+
+// SetAToken 设置 Token
+func (fg *fastGinRepo) SetAToken(ID, token string, c *gin.Context) (err error) {
+	trace := public.GetGinTraceContext(c)
+
+	//_, err = redis.ConfDo(trace, "default", "SET", redis.GetRedisKey(redis.KeyFastGinJWTSetPrefix+ID), token, time.Hour*time.Duration(settings.GetIntConf("base.auth.jwt_expire")))
+	_, err = redis.ConfDo(trace, "default", "SET", redis.GetRedisKey(redis.KeyFastGinJWTSetPrefix+ID), token)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// GetAToken 获取 Token
+func GetAToken(ID string, c *gin.Context) (token string, err error) {
+	trace := public.GetGinTraceContext(c)
+
+	_token, err := redis.ConfDo(trace, "default", "GET", redis.GetRedisKey(redis.KeyFastGinJWTSetPrefix+ID))
+	if err != nil {
+		return "", err
+	}
+	token, err = red.String(_token, err)
+	if err != nil {
+		return "", nil
+	}
 	return
 }

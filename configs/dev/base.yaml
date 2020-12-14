@@ -24,3 +24,7 @@ log:
 # auth
 auth:
   jwt_expire: 168 # 过期时间为一周（24 * 7）
+
+session:
+  redis_server: "127.0.0.1:6379"   #redis session server
+  redis_password: "644315"

@@ -2,13 +2,29 @@ package public
 
 import (
 	"errors"
+	mylog "github.com/captainlee1024/fast-gin/internal/fastgin/log"
 	"github.com/gin-gonic/gin"
 	"strconv"
 )
 
-const CtxUserIDKey = "userID"
+//const CtxUserIDKey = "userID"
 
 var ErrorUserNotLogin = errors.New("用户未登录")
+
+// GetGinTraceContext 从gin的Context中获取数据
+func GetGinTraceContext(c *gin.Context) *mylog.TraceContext {
+	// 防御
+	if c == nil {
+		return mylog.NewTrace()
+	}
+	traceContext, exists := c.Get(ContextTrace)
+	if exists {
+		if tc, ok := traceContext.(*mylog.TraceContext); ok {
+			return tc
+		}
+	}
+	return mylog.NewTrace()
+}
 
 // GetCurrentUserID 获取当前登录用户的 ID
 func GetCurrentUserID(c *gin.Context) (userID int64, err error) {

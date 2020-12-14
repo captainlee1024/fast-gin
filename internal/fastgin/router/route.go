@@ -2,7 +2,10 @@ package router
 
 import (
 	"github.com/captainlee1024/fast-gin/internal/fastgin/controller"
-	"github.com/captainlee1024/fast-gin/pkg/jwt"
+	"github.com/captainlee1024/fast-gin/internal/fastgin/data"
+	mylog "github.com/captainlee1024/fast-gin/internal/fastgin/log"
+	"github.com/captainlee1024/fast-gin/internal/fastgin/service"
+	"github.com/gin-gonic/contrib/sessions"
 
 	"github.com/captainlee1024/fast-gin/internal/fastgin/middleware"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/settings"
@@ -18,46 +21,45 @@ func SetUp() *gin.Engine {
 
 	r := gin.New()
 
-	v1 := r.Group("/fastgin")
+	v1 := r.Group("/fastgin/v1")
 	v1.Use(
-		middleware.RequestLog(),
-		middleware.GinRecovery(true),
-		middleware.TranslationMiddleware(),
-	)
-	{
-		controller.FastGinRegister(v1)
-	}
-
-	// 非登录接口
-	apiNormalGroup := r.Group("/api")
-	apiNormalGroup.Use(
 		middleware.RequestLog(),
 		middleware.GinRecovery(true),
 		middleware.TranslationMiddleware(),
 		middleware.IPAuthMiddleware(),
 	)
 	{
-		apiNormalGroup.GET("/jwt", func(c *gin.Context) {
-			// 注意：保存到 Redis 的时候，Key 是转换成 string 类型之后的 ID 这里是 11
-			jwt, _ := jwt.GenToken(int64(11), "Jojo")
-			middleware.ResponseSuccess(c, jwt)
-			return
-		})
-	}
+		//controller.FastGinRegister(v1)
 
-	// 登录接口
-	apiAuthGroup := r.Group("/api")
-	apiAuthGroup.Use(
-		middleware.RequestLog(),
-		middleware.GinRecovery(true),
-		middleware.TranslationMiddleware(),
-		middleware.JWTAuthMiddleware(),
-	)
-	{
-		apiAuthGroup.GET("/jwtauth", func(c *gin.Context) {
-			middleware.ResponseSuccess(c, "JWTAuth Success!")
-			return
-		})
+		fastGin := controller.NewFastGinController(service.NewFastGinUsercase(data.NewFastGinRepo()))
+
+		v1.GET("/", fastGin.IndexHandler)
+		v1.GET("error", fastGin.ErrorHandler)
+		v1.GET("/ping", fastGin.PingHandler)
+		v1.GET("/listpage", fastGin.GetFastGinListHandler)
+		v1.POST("/add", fastGin.AddFastGinHandler)
+		v1.POST("/get", fastGin.GetFastGinHandler)
+		v1.POST("/edit", fastGin.EditFastGinHandler)
+		v1.POST("/remove", fastGin.RemoveFastGinHandler)
+		v1.POST("/jwt/get", fastGin.GetJWTTokenHandler)
+
+		// 使用 JWT 方式认证的接口
+		authJWT := v1.Group("", middleware.JWTAuthMiddleware())
+		{
+			authJWT.POST("/jwt/auth", fastGin.AuthFastGinJWTHandler)
+		}
+		// TODO: Session 登录认证待完善
+		// 使用 Session 方式认证的接口
+		store, err := sessions.NewRedisStore(10, "tcp", settings.GetStringConf("base.session.redis_server"), settings.GetStringConf("base.session.redis_password"), []byte("secret"))
+		if err != nil {
+			mylog.Log.Fatal("sessions.NewRedisStore", mylog.NewTrace(), mylog.DLTagUndefind, map[string]interface{}{"error": err})
+		}
+		authSession := v1.Group("",
+			sessions.Sessions("mysession", store),
+			middleware.SessionAuthMiddleware())
+		{
+			authSession.GET("/session/auth", fastGin.AuthFastGinSessionHandler)
+		}
 
 	}
 

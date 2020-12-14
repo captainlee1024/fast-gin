@@ -3,16 +3,20 @@ package middleware
 import (
 	"errors"
 	"fmt"
+	"github.com/captainlee1024/fast-gin/internal/fastgin/data"
+	"github.com/captainlee1024/fast-gin/internal/pkg/public"
 	"strings"
-
-	"github.com/captainlee1024/fast-gin/internal/fastgin/data/redis"
-	red "github.com/garyburd/redigo/redis"
 
 	"github.com/captainlee1024/fast-gin/pkg/jwt"
 	"github.com/gin-gonic/gin"
 )
 
 // JWTAuthMiddleware JWT 认证中间件
+// 1. 查看请求头里是否带有 Token
+// 2. 查看 Token 格式是否正确
+// 3. 解析 Token
+// 4. 判断与 Redis 中的 Token 是否相等（这样可以保证只能有一个客户端登录，在其他地方登录 Redis Token 刷新，之前的登录就作废了）
+// 5. 都满足，进行下一步
 func JWTAuthMiddleware() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		// // redisToken = string(redisToken.(string))
@@ -43,10 +47,9 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 		}
 
 		// 解析有效之后在判断是否与 Redis 中存的 token 相等
-		trace := GetGinTraceContext(c)
-		fmt.Sprintln("redis start ==========")
-		redisToken, err := red.String(redis.ConfDo(trace, "default", "GET", fmt.Sprint(mc.UserID)))
-		fmt.Sprintln("redis end ==========")
+		//trace := GetGinTraceContext(c)
+		//redisToken, err := red.String(redis.ConfDo(trace, "default", "GET", fmt.Sprint(mc.UserID)))
+		redisToken, err := data.GetAToken(fmt.Sprint(mc.UserID), c)
 
 		// redisToken = string(redisToken.(string))
 		if err != nil {
@@ -54,6 +57,7 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 			c.Abort()
 			return
 		}
+
 		if parts[1] != redisToken {
 			ResponseError(c, CodeLoginElsewhere, errors.New(CodeLoginElsewhere.Msg()))
 			c.Abort()
@@ -61,7 +65,7 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 		}
 		//fmt.Println(authHeader, parts)
 		// 将当前请求的 userID 信息保存到请求的上下文 c 中
-		c.Set(CtxUserIDKey, mc.UserID)
+		c.Set(public.CtxUserIDKey, mc.UserID)
 		c.Next() // 后续的处理函数可以通过 c.Get(controller.CtxUserIDKey) 来获取当前请求用户的 userID
 	}
 }

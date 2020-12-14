@@ -3,20 +3,13 @@ package middleware
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/captainlee1024/fast-gin/internal/pkg/public"
 	"net/http"
 	"strings"
 
 	"github.com/captainlee1024/fast-gin/internal/fastgin/settings"
 
 	"github.com/gin-gonic/gin"
-)
-
-//context需要设置的东西
-const (
-	// 上下文设置
-	CtxResponseKey = "response" // response
-	CtxUserIDKey   = "userID"   // userID
-	CtxUserKey     = "user"
 )
 
 // Response 响应结构体
@@ -30,7 +23,7 @@ type Response struct {
 
 // ResponseSuccess 成功时返回
 func ResponseSuccess(c *gin.Context, data interface{}) {
-	traceContext := GetGinTraceContext(c)
+	traceContext := public.GetGinTraceContext(c)
 	traceID := ""
 	if traceContext != nil {
 		traceID = traceContext.TraceID
@@ -45,13 +38,13 @@ func ResponseSuccess(c *gin.Context, data interface{}) {
 
 	c.JSON(http.StatusOK, resp)
 	response, _ := json.Marshal(resp)
-	c.Set(CtxResponseKey, string(response))
+	c.Set(public.CtxResponseKey, string(response))
 
 }
 
 // ResponseError 错误时返回
 func ResponseError(c *gin.Context, code ResponseCode, err error) {
-	traceContext := GetGinTraceContext(c)
+	traceContext := public.GetGinTraceContext(c)
 	traceID := ""
 	if traceContext != nil {
 		traceID = traceContext.TraceID
@@ -72,7 +65,7 @@ func ResponseError(c *gin.Context, code ResponseCode, err error) {
 
 	c.JSON(200, resp)
 	response, _ := json.Marshal(resp)
-	c.Set(CtxResponseKey, string(response))
+	c.Set(public.CtxResponseKey, string(response))
 	c.AbortWithError(200, err)
 }
 

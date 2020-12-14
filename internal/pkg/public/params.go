@@ -40,7 +40,7 @@ func DefaultGetValidParams(c *gin.Context, params interface{}) error {
 
 // GetValidator 获取验证器
 func GetValidator(c *gin.Context) (*validator.Validate, error) {
-	val, ok := c.Get(ValidatorKey)
+	val, ok := c.Get(CtxValidatorKey)
 	if !ok {
 		return nil, errors.New("未设置验证器")
 	}
@@ -53,7 +53,7 @@ func GetValidator(c *gin.Context) (*validator.Validate, error) {
 
 // GetTranslation 获取翻译器
 func GetTranslation(c *gin.Context) (ut.Translator, error) {
-	trans, ok := c.Get(TranslatorKey)
+	trans, ok := c.Get(CtxTranslatorKey)
 	if !ok {
 		return nil, errors.New("未设置翻译器")
 	}
