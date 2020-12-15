@@ -1,6 +1,11 @@
 package router
 
 import (
+	_ "github.com/captainlee1024/fast-gin/docs" // 千万不要忘了导入把你上一步生成的docs
+
+	gs "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
+
 	"github.com/captainlee1024/fast-gin/internal/fastgin/controller"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/data"
 	mylog "github.com/captainlee1024/fast-gin/internal/fastgin/log"
@@ -20,6 +25,8 @@ func SetUp() *gin.Engine {
 	}
 
 	r := gin.New()
+
+	r.GET("/swagger/*any", gs.WrapHandler(swaggerFiles.Handler))
 
 	v1 := r.Group("/fastgin/v1")
 	v1.Use(

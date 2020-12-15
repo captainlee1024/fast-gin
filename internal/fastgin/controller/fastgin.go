@@ -53,6 +53,15 @@ type FastGinController struct {
 }
 
 // NewFastGinController .
+// NewFastGinController
+// @Summary Index 接口
+// @Description 这是 FastGin 的欢迎页面接口
+// @Tags FastGinDemo
+// @Accept application/json
+// @Produce application/json
+// @Security
+// @Success 200
+// @Router / [get]
 func NewFastGinController(fus *service.FastGinUsecase) *FastGinController {
 	return &FastGinController{fus: fus}
 }

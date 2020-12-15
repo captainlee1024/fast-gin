@@ -37,7 +37,7 @@ import (
 
 // @title Fast-Gin（这里写标题）
 // @version 1.0
-// @description Fast-Gin 是一个能够帮助你快速开发的 Web 通用脚手架
+// @description Go Web 通用脚手架
 // @termsOfService http://swagger.io/terms/
 
 // @contact.name CaptainLee1024（这里换成你的信息）
@@ -52,7 +52,7 @@ import (
 func main() {
 	// 1. 加载配置
 	// 2. 初始化日志
-	if err := settings.Init("../../configs/dev/"); err != nil {
+	if err := settings.Init("./configs/dev/"); err != nil {
 		// log.Fatal(err)
 		panic(err)
 	}

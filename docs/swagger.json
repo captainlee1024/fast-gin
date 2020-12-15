@@ -1,0 +1,45 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Go Web 通用脚手架",
+        "title": "Fast-Gin（这里写标题）",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "CaptainLee1024（这里换成你的信息）",
+            "url": "http://blog.leecoding.club",
+            "email": "644052732@qq.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0"
+    },
+    "host": "127.0.0.1:8080",
+    "basePath": "/fastgin/v1",
+    "paths": {
+        "/": {
+            "get": {
+                "security": [
+                    {
+                        "": []
+                    }
+                ],
+                "description": "这是 FastGin 的欢迎页面接口",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "FastGinDemo"
+                ],
+                "summary": "Index 接口",
+                "responses": {
+                    "200": {}
+                }
+            }
+        }
+    }
+}

@@ -16,7 +16,7 @@ http:
 # log
 log:
   level: "debug" # x
-  filename: "../../fast-gin.log"
+  filename: "./logs/fast-gin.log"
   max_size: 200 # 日志最大容量（单位 MB）
   max_age: 30 # 备份存储最大时间
   max_backup: 7 # 日志最大备份数量

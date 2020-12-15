@@ -1,2 +1,4 @@
-*.log
+logs/*.log
+!logs/_your_app_.log
+
 .idea

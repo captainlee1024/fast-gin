@@ -1,0 +1,30 @@
+basePath: /fastgin/v1
+host: 127.0.0.1:8080
+info:
+  contact:
+    email: 644052732@qq.com
+    name: CaptainLee1024（这里换成你的信息）
+    url: http://blog.leecoding.club
+  description: Go Web 通用脚手架
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Fast-Gin（这里写标题）
+  version: "1.0"
+paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: 这是 FastGin 的欢迎页面接口
+      produces:
+      - application/json
+      responses:
+        "200": {}
+      security:
+      - "": []
+      summary: Index 接口
+      tags:
+      - FastGinDemo
+swagger: "2.0"

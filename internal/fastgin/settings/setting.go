@@ -35,13 +35,13 @@ func Init(configPath string) error {
 // 3. 加载 redis 配置
 // 4. 初始化日志
 func InitModule(configPath string, modules []string) error {
-	conf := flag.String("conf", configPath, "imput config fiel like: ../../configs/dev")
+	conf := flag.String("conf", configPath, "imput config fiel like: /configs/dev")
 	flag.Parse()
 	if *conf == "" {
 		flag.Usage()
 		os.Exit(1)
 	}
-	log.Println(time.Now().Format("")+"------------------------------------------------------------------------")
+	log.Println(time.Now().Format("") + "------------------------------------------------------------------------")
 	log.Printf("[INFO] config=%s\n", *conf)
 	log.Printf("[INFO] start loading resources.\n")
 
