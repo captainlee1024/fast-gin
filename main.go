@@ -35,9 +35,9 @@ import (
 // @BasePath 这里写base path
 */
 
-// @title Fast-Gin（这里写标题）
+// @title Fast-Gin
 // @version 1.0
-// @description Go Web 通用脚手架
+// @description Fast-Gin 是一个能够帮助你快速进行开发的 Web 通用脚手架
 // @termsOfService http://swagger.io/terms/
 
 // @contact.name CaptainLee1024（这里换成你的信息）

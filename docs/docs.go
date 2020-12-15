@@ -74,8 +74,8 @@ var SwaggerInfo = swaggerInfo{
 	Host:        "127.0.0.1:8080",
 	BasePath:    "/fastgin/v1",
 	Schemes:     []string{},
-	Title:       "Fast-Gin（这里写标题）",
-	Description: "Go Web 通用脚手架",
+	Title:       "Fast-Gin",
+	Description: "Fast-Gin 是一个能够帮助你快速进行开发的 Web 通用脚手架",
 }
 
 type s struct{}

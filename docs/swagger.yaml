@@ -5,12 +5,12 @@ info:
     email: 644052732@qq.com
     name: CaptainLee1024（这里换成你的信息）
     url: http://blog.leecoding.club
-  description: Go Web 通用脚手架
+  description: Fast-Gin 是一个能够帮助你快速进行开发的 Web 通用脚手架
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
   termsOfService: http://swagger.io/terms/
-  title: Fast-Gin（这里写标题）
+  title: Fast-Gin
   version: "1.0"
 paths:
   /:
