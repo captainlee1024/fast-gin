@@ -16,7 +16,7 @@ import (
 
 // 配置信息全局变量
 var (
-	ConfBase     = new(BaseConfig)
+	ConfBase = new(BaseConfig)
 	//ConfMySQL    = new(MySQLConfig)
 	ConfMySQLMap = new(MySQLMapConfig)
 	//ConfRedis    = new(RedisConfig)
