@@ -77,11 +77,11 @@ func (uc *FastGinUsecase) GetFastGin(fdo *do.FastGinDo, c *gin.Context) (fastGin
 // ListFastGin 获取所有 FastGin
 func (uc *FastGinUsecase) ListFastGin(fgListDo *do.FastGinListPageDo, c *gin.Context) (listFastGin []*do.FastGinDo, err error) {
 	// 分页处理
-	if !fgListDo.PageIsOk() {
+	if fgListDo.PageIsEmpty() {
 		page, _ := public.GetPageInfo(c)
 		fgListDo.Page = page
 	}
-	if !fgListDo.PageSizeIsOk() {
+	if fgListDo.PageSizeIsEmpty() {
 		_, size := public.GetPageInfo(c)
 		fgListDo.PageSize = size
 	}

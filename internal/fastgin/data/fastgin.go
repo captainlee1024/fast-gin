@@ -3,7 +3,10 @@ package data
 import (
 	"database/sql"
 	"errors"
+
 	red "github.com/garyburd/redigo/redis"
+
+	"time"
 
 	"github.com/captainlee1024/fast-gin/internal/fastgin/data/mysql"
 	"github.com/captainlee1024/fast-gin/internal/fastgin/data/redis"
@@ -13,7 +16,6 @@ import (
 	"github.com/captainlee1024/fast-gin/internal/pkg/public"
 	"github.com/captainlee1024/fast-gin/pkg/snowflake"
 	"github.com/gin-gonic/gin"
-	"time"
 )
 
 // 在编译的时候可以知道这个对象实现了这个 interface{}

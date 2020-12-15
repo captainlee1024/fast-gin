@@ -54,12 +54,14 @@ func GetPageInfo(c *gin.Context) (int, int) {
 	)
 
 	page, err = strconv.ParseInt(pageStr, 10, 64)
-	if err != nil {
+	if err != nil { // 页数默认值为 1
 		page = 1
 	}
 	size, err = strconv.ParseInt(sizeStr, 10, 64)
-	if err != nil {
+	if err != nil { // size 默认值为 10
 		size = 10
 	}
+	//fmt.Printf("\n\n%d<%d>\n\n", page, size)
+
 	return int(page), int(size)
 }

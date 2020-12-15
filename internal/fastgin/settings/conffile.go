@@ -3,6 +3,7 @@ package settings
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -75,16 +76,19 @@ func ParseConfig(path string, fileName string, conf interface{}) (err error) {
 	v.WatchConfig()
 
 	v.OnConfigChange(func(e fsnotify.Event) {
-		fmt.Printf("%v config file changed...\n", fileName)
+		fmt.Println(time.Now().Format(TimeFormat)+" ------------------------------------------------------------------------")
+		fmt.Printf("%s [INFO] %v config file changed...\n", time.Now().Format(TimeFormat), fileName)
 		if err = v.Unmarshal(conf); err != nil {
 			err = fmt.Errorf("unmarshal changed conf failed, err: %v", err)
 		}
-		fmt.Println("配置已同步...")
+		fmt.Printf("%s [INFO] ==> %v\n", time.Now().Format(TimeFormat), ConfBase)
 		// fmt.Printf("===>%#v\n", ConfBase)
-		fmt.Printf("===>%#v\n", ConfRedisMap.List["default"])
-		fmt.Printf("===>%#v\n", ConfRedis)
-		fmt.Printf("===>%#v\n", ConfMySQLMap.List["default"])
-		fmt.Printf("===>%#v\n", ConfMySQL)
+		fmt.Printf("%s [INFO] ===> %#v\n", time.Now().Format(TimeFormat),ConfRedisMap.List["default"])
+		//fmt.Printf("===>%#v\n", ConfRedis)
+		fmt.Printf("%s [INFO] ===> %#v\n", time.Now().Format(TimeFormat),ConfMySQLMap.List["default"])
+		//fmt.Printf("===>%#v\n", ConfMySQL)
+		fmt.Println(time.Now().Format(TimeFormat) + " [INFO] 配置已同步...")
+		fmt.Println(time.Now().Format(TimeFormat)+" ------------------------------------------------------------------------")
 	})
 
 	return nil

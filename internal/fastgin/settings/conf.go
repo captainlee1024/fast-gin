@@ -17,9 +17,9 @@ import (
 // 配置信息全局变量
 var (
 	ConfBase     = new(BaseConfig)
-	ConfMySQL    = new(MySQLConfig)
+	//ConfMySQL    = new(MySQLConfig)
 	ConfMySQLMap = new(MySQLMapConfig)
-	ConfRedis    = new(RedisConfig)
+	//ConfRedis    = new(RedisConfig)
 	ConfRedisMap = new(RedisMapConfig)
 	ViperConfMap map[string]*viper.Viper
 )
@@ -106,7 +106,7 @@ func initRedisConf(path string, fileName string) (err error) {
 	if err != nil {
 		return err
 	}
-	ConfRedis = ConfRedisMap.List["default"]
+	//ConfRedis = ConfRedisMap.List["default"]
 	return nil
 }
 
@@ -116,7 +116,7 @@ func initMySQLConf(path string, fileName string) (err error) {
 	if err != nil {
 		return err
 	}
-	ConfMySQL = ConfMySQLMap.List["default"]
+	//ConfMySQL = ConfMySQLMap.List["default"]
 	return
 }
 

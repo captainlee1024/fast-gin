@@ -41,7 +41,7 @@ func InitModule(configPath string, modules []string) error {
 		flag.Usage()
 		os.Exit(1)
 	}
-	log.Println("------------------------------------------------------------------------")
+	log.Println(time.Now().Format("")+"------------------------------------------------------------------------")
 	log.Printf("[INFO] config=%s\n", *conf)
 	log.Printf("[INFO] start loading resources.\n")
 

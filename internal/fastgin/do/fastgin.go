@@ -41,12 +41,12 @@ type FastGinListPageDo struct {
 
 // PageSizeIsOk 是否设置了每页数量
 // 如果设置了返回 true，否则返回 false
-func (f *FastGinListPageDo) PageSizeIsOk() bool {
+func (f *FastGinListPageDo) PageSizeIsEmpty() bool {
 	return f.PageSize == 0
 }
 
 // PageIsOk 是否设置了从第几页开始查询
 // 如果设置了返回 true，否则返回 false
-func (f *FastGinListPageDo) PageIsOk() bool {
+func (f *FastGinListPageDo) PageIsEmpty() bool {
 	return f.Page == 0
 }

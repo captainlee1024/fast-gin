@@ -61,7 +61,7 @@ func NewFastGinController(fus *service.FastGinUsecase) *FastGinController {
 //	return NewFastGinController(service.NewFastGinUsercase(data.NewFastGinRepo()))
 //}
 
-// Index 处理器
+// IndexHandler 处理器
 func (fastGin *FastGinController) IndexHandler(c *gin.Context) {
 	bizData, err := fastGin.fus.IndexBiz(c)
 	if err != nil {
@@ -70,7 +70,7 @@ func (fastGin *FastGinController) IndexHandler(c *gin.Context) {
 	middleware.ResponseSuccess(c, bizData)
 }
 
-// Ping 处理器
+// PingHandler 处理器
 func (fastGin *FastGinController) PingHandler(c *gin.Context) {
 	bizData, err := fastGin.fus.PingPong(c)
 	if err != nil {
@@ -79,7 +79,7 @@ func (fastGin *FastGinController) PingHandler(c *gin.Context) {
 	middleware.ResponseSuccess(c, bizData)
 }
 
-// Error 处理器
+// ErrorHandler 处理器
 func (fastGin *FastGinController) ErrorHandler(c *gin.Context) {
 	bizData, err := fastGin.fus.ErrorBiz(c)
 	if err != nil {
@@ -108,6 +108,7 @@ func (fastGin *FastGinController) AddFastGinHandler(c *gin.Context) {
 	middleware.ResponseSuccess(c, "Add FastGin success!")
 }
 
+// GetFastGinHandler .
 func (fastGin *FastGinController) GetFastGinHandler(c *gin.Context) {
 	fgDto := new(dto.FastGinDto)
 	if err := fgDto.BindingValidParams(c); err != nil {
@@ -134,7 +135,19 @@ func (fastGin *FastGinController) GetFastGinHandler(c *gin.Context) {
 	middleware.ResponseSuccess(c, responseDto)
 }
 
+// GetFastGinListHandler .
 func (fastGin *FastGinController) GetFastGinListHandler(c *gin.Context) {
+
+	//// 分页处理
+	//if !fgListDo.PageIsOk() {
+	//	page, _ := public.GetPageInfo(c)
+	//	fgListDo.Page = page
+	//}
+	//if !fgListDo.PageSizeIsOk() {
+	//	_, size := public.GetPageInfo(c)
+	//	fgListDo.PageSize = size
+	//}
+
 	fgListDto := new(dto.FastGinListPageDto)
 	if err := fgListDto.BindingValidParems(c); err != nil {
 		middleware.ResponseError(c, 2001, err)
@@ -198,6 +211,7 @@ func (fastGin *FastGinController) RemoveFastGinHandler(c *gin.Context) {
 	middleware.ResponseSuccess(c, "success! 删除成功！")
 }
 
+// GetJWTTokenHandler .
 func (fastGin *FastGinController) GetJWTTokenHandler(c *gin.Context) {
 	// 1. 参数校验
 	fgDto := new(dto.FastGinDto)
@@ -253,6 +267,6 @@ func (fastGin *FastGinController) AuthFastGinJWTHandler(c *gin.Context) {
 }
 
 // AuthFastGinSessionHandler 测试 Session 认证中间件的服务
-func (fastgin *FastGinController) AuthFastGinSessionHandler(c *gin.Context) {
+func (fastGin *FastGinController) AuthFastGinSessionHandler(c *gin.Context) {
 	middleware.ResponseSuccess(c, "你已经通过了 Session 认证哦！")
 }

@@ -5,7 +5,7 @@ mode: "dev" # 程序运行的模式，这里是开发模式
 port: 8080 # 程序运行的端口
 start_time: "2020-12-01"
 time_location: "Asia/Shanghai"
-machine_id: 11
+machine_id: 1
 
 http:
   allow_ip: [
